@@ -1,0 +1,36 @@
+/* GenerateRecipe Page Styles */
+.recipe-form {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .recipe-form h2 {
+    margin-bottom: 20px;
+    color: #007bff;
+  }
+  
+  .recipe-form label {
+    font-weight: bold;
+  }
+  
+  .recipe-form form > div {
+    margin-bottom: 15px;
+  }
+  
+  button {
+    margin-top: 20px;
+  }
+  
+  .recipe-form input[type="checkbox"] {
+    margin-right: 10px;
+  }
+  
+  .recipe-form ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  

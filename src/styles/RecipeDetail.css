@@ -1,0 +1,38 @@
+/* RecipeDetail Page Styles */
+.recipe-card {
+    background-color: white;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .recipe-card img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .recipe-card h2 {
+    color: #007bff;
+  }
+  
+  .recipe-card ul,
+  .recipe-card ol {
+    margin-left: 20px;
+  }
+  
+  button {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background-color: #28a745;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  button:hover {
+    background-color: #218838;
+  }
+  

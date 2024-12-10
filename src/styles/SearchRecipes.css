@@ -1,0 +1,49 @@
+/* SearchRecipes Page Styles */
+.search-container {
+    margin: 30px auto;
+    max-width: 800px;
+    text-align: center;
+  }
+  
+  .search-container input {
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .search-results {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  
+  .search-results .recipe-card {
+    width: 45%;
+    margin: 10px 0;
+  }
+  
+  .search-results .recipe-card h3 {
+    color: #007bff;
+  }
+  
+  .search-results .recipe-card img {
+    max-width: 100%;
+    border-radius: 10px;
+  }
+  
+  .search-results button {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .search-results button:hover {
+    background-color: #0056b3;
+  }
+  

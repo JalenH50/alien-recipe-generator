@@ -1,0 +1,211 @@
+/* Global styles for the page */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212; /* Dark background */
+  color: white; /* White text for dark mode */
+  margin: 0;
+  padding: 0;
+}
+
+h2, h3 {
+  color: #fff;
+  text-align: center;
+}
+
+/* Banner Styling */
+.banner {
+  background-color: #333;
+  padding: 15px;
+  text-align: center;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999;
+}
+
+.banner h1 {
+  margin: 0;
+  color: #f5a623;
+  font-size: 30px;
+}
+
+.banner nav {
+  margin-top: 10px;
+}
+
+.banner nav a {
+  color: white;
+  margin: 0 15px;
+  text-decoration: none;
+}
+
+.banner nav a:hover {
+  text-decoration: underline;
+}
+
+.nav-links {
+  color: white;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.nav-links a {
+  color: white;            /* White color for text */
+  margin: 0 15px;          /* Spacing between links */
+  text-decoration: none;   /* Remove underline */
+  font-size: 18px;         /* Font size for links */
+}
+
+/* Container to hold main content */
+main {
+  padding-top: 120px; /* To avoid banner overlap */
+  padding: 20px;
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+table th, table td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+table th {
+  background-color: #444;
+}
+
+table tr:nth-child(even) {
+  background-color: #333;
+}
+
+table tr:hover {
+  background-color: #555;
+}
+
+/* Form Styling */
+form {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #333;
+  border-radius: 8px;
+}
+
+form div {
+  margin-bottom: 10px;
+}
+
+form label {
+  color: #fff;
+  font-size: 16px;
+}
+
+form input, form select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #555;
+  background-color: #222;
+  color: white;
+  font-size: 16px;
+  border-radius: 4px;
+}
+
+form select {
+  cursor: pointer;
+}
+
+/* Styling for the tag dropdown */
+.tag-dropdown {
+  width: 100%; 
+  height: auto;
+  padding: 8px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background-color: #222;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Option styling inside the select dropdown */
+.tag-dropdown option {
+  padding: 10px;
+  background-color: #333;
+  color: white;
+}
+
+/* Buttons */
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+/* Centering the form and table */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 140px; /* Adjusted to give space for the fixed banner */
+}
+
+button {
+  margin-top: 10px;
+  width: 100%;
+}
+
+/* Additional styling for edit and delete buttons */
+button:active {
+  transform: scale(0.98);
+}
+
+button.delete {
+  background-color: #f44336;
+}
+
+button.delete:hover {
+  background-color: #d32f2f;
+}
+
+/* Add responsiveness to handle smaller screens */
+@media (max-width: 768px) {
+  .banner nav a {
+    margin: 0 8px;
+    font-size: 14px;
+  }
+
+  form {
+    padding: 15px;
+  }
+
+  table th, table td {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .container {
+    margin-top: 180px; /* Adjust container for small screens */
+  }
+}
