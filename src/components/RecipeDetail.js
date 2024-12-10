@@ -1,73 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import supabase from '../services/supabaseClient'; // Adjust the import path if necessary
-import '../styles/RecipeDetail.css';
+import supabase from '../services/supabaseClient';
 
-function RecipeDetail() {
-  const { id } = useParams();  // Get the recipe id from the URL
+function RecipeDetails() {
+  const { id } = useParams(); // Get the recipe ID from the URL
   const [recipe, setRecipe] = useState(null);
-  const [likes, setLikes] = useState(0);  // State to track likes
+  const [steps, setSteps] = useState([]);
 
-  // Fetch recipe details from Supabase
-  useEffect(() => {
-    const fetchRecipe = async () => {
-      const { data, error } = await supabase
-        .from('recipes')
-        .select('*')
-        .eq('id', id)
-        .single();  // Fetch the recipe by id
-
-      if (error) {
-        console.error('Error fetching recipe:', error);
-      } else {
-        setRecipe(data);  // Store recipe data
-        setLikes(data.likes || 0);  // Set initial likes
-      }
-    };
-
-    fetchRecipe();
-  }, [id]);
-
-  // Handle the "like" button click
-  const handleLike = async () => {
-    const updatedLikes = likes + 1;
-    setLikes(updatedLikes);  // Update local state to immediately reflect the like count
-
-    // Update the likes count in Supabase
-    const { error } = await supabase
+  // Define the fetch function outside useEffect to avoid the warning
+  const fetchRecipeDetails = async () => {
+    // Fetch recipe details based on the recipe ID
+    const { data: recipeData, error: recipeError } = await supabase
       .from('recipes')
-      .update({ likes: updatedLikes })
-      .eq('id', id);  // Update the likes for the recipe with the given id
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    if (error) {
-      console.error('Error updating likes:', error);
+    if (recipeError) {
+      console.error('Error fetching recipe details:', recipeError);
+    } else {
+      setRecipe(recipeData);
+      // If the steps column is available, store it as an array
+      setSteps(recipeData.steps || []); // `steps` will already be an array of strings
     }
   };
 
+  useEffect(() => {
+    fetchRecipeDetails();
+  }, [id]); // Only re-run when `id` changes
+
   if (!recipe) {
-    return <p>Loading recipe...</p>;  // Loading state
+    return <div>Loading...</div>;
   }
 
   return (
     <div>
       <h2>{recipe.name}</h2>
-      {/* Display image if available */}
-      {recipe.image_url && <img src={recipe.image_url} alt={recipe.name} />}
-      <p><strong>Tags:</strong> {recipe.tags.join(', ')}</p>
-      <p><strong>Steps:</strong></p>
-      <ul>
-        {recipe.steps.map((step, index) => (
-          <li key={index}>{step}</li>
-        ))}
-      </ul>
-
-      {/* Like button */}
-      <div>
-        <p><strong>Likes:</strong> {likes}</p>
-        <button onClick={handleLike}>Like</button> {/* On click, increments likes */}
-      </div>
+      <img src={recipe.image_url} alt={recipe.name} />
+      <h3>Steps</h3>
+      <ol>
+        {steps.length > 0 ? (
+          steps.map((step, index) => (
+            <li key={index}>
+              {step}
+            </li>
+          ))
+        ) : (
+          <li>No steps available</li>
+        )}
+      </ol>
     </div>
   );
 }
 
-export default RecipeDetail;
+export default RecipeDetails;

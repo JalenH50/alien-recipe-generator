@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import GenerateRecipe from './GenerateRecipe';
-import RecipeList from './RecipeList';
 import SearchRecipes from './SearchRecipes';
 import RecipeDetail from './RecipeDetail';
 import Ingredient from './Ingredient';  
@@ -18,7 +17,6 @@ function App() {
           <div className="nav-links">
             <Link to="/generate">Generate Recipe</Link>
             <Link to="/recipes">Search Recipes</Link>
-            <Link to="/search">Search Recipes</Link>
             <Link to="/ingredients">Ingredients</Link>
             <Link to="/tags">Tags</Link> {/* Link to Tags */}
             <Link to="/cooking-methods">Cooking Methods</Link> {/* New Link for Cooking Methods */}
@@ -29,8 +27,7 @@ function App() {
         <div className="container">
           <Routes>
             <Route path="/generate" element={<GenerateRecipe />} />
-            <Route path="/recipes" element={<RecipeList />} />
-            <Route path="/search" element={<SearchRecipes />} />
+            <Route path="/recipes" element={<SearchRecipes />} />
             <Route path="/recipe/:id" element={<RecipeDetail />} />
             <Route path="/ingredients" element={<Ingredient />} />
             <Route path="/tags" element={<Tags />} /> {/* Route for Tags */}

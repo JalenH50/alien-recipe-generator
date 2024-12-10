@@ -1,41 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import supabase from '../services/supabaseClient'; // Adjust the import path if necessary
-import '../styles/SearchRecipes.css';
+import supabase from '../services/supabaseClient';
 
-function SearchRecipes() {
-  const [searchTerm, setSearchTerm] = useState('');
+function RecipeList() {
   const [recipes, setRecipes] = useState([]);
-  const [tags, setTags] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Fetch tags from the database
   useEffect(() => {
-    const fetchTags = async () => {
-      const { data, error } = await supabase.from('tags').select('*');
-      if (error) {
-        console.error('Error fetching tags:', error);
-      } else {
-        setTags(data);
-      }
-    };
-
-    fetchTags();
+    fetchRecipes();
   }, []);
 
-  // Fetch recipes based on search term
-  const handleSearch = async () => {
-    if (searchTerm.trim() === '') {
-      alert('Please enter a search term.');
-      return;
-    }
-
-    // Query the recipes by name or tag
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('*')
-      .ilike('name', `%${searchTerm}%`) // Search by recipe name (case-insensitive)
-      .or(`tags.ilike.%${searchTerm}%`); // Search by tag (case-insensitive)
-
+  const fetchRecipes = async () => {
+    const { data, error } = await supabase.from('recipes').select('*');
     if (error) {
       console.error('Error fetching recipes:', error);
     } else {
@@ -43,44 +19,76 @@ function SearchRecipes() {
     }
   };
 
+  // Helper function to check if search term matches recipe name or tags
+  const matchesSearchTerm = (recipe) => {
+    const isNameMatch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const isTagMatch = recipe.tags && recipe.tags.some(tag => 
+      tag?.name && tag.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return isNameMatch || isTagMatch;
+  };
+
+  const filteredRecipes = recipes.filter(recipe => matchesSearchTerm(recipe));
+
+  // Function to increment the like count for a recipe
+  const handleLike = async (recipeId, currentLikes) => {
+    const newLikes = currentLikes + 1;
+
+    // Update the likes count in the database
+    const { data, error } = await supabase
+      .from('recipes')
+      .update({ likes: newLikes })
+      .eq('id', recipeId)
+      .select();
+
+    if (error) {
+      console.error('Error updating likes:', error);
+    } else {
+      // Update the state to reflect the new likes count
+      const updatedRecipes = recipes.map((recipe) =>
+        recipe.id === recipeId ? { ...recipe, likes: newLikes } : recipe
+      );
+      setRecipes(updatedRecipes);
+    }
+  };
+
   return (
     <div>
-      <h2>Search Recipes</h2>
+      <input
+        type="text"
+        placeholder="Search recipes..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+      <div className="recipe-list">
+        {filteredRecipes.length > 0 ? (
+          filteredRecipes.map(recipe => (
+            <div key={recipe.id} className="recipe-item">
+              <div className="recipe-header">
+                <Link to={`/recipe/${recipe.id}`}>
+                  <h2>{recipe.name}</h2>
+                </Link>
 
-      {/* Search Bar */}
-      <div>
-        <input
-          type="text"
-          placeholder="Search by name or tag..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <button onClick={handleSearch}>Search</button>
-      </div>
+                {/* Like Button */}
+                <button
+                  onClick={() => handleLike(recipe.id, recipe.likes)}
+                  className="like-button"
+                >
+                  Like {recipe.likes || 0}
+                </button>
+              </div>
 
-      {/* Search Results */}
-      <div>
-        {recipes.length > 0 ? (
-          <div>
-            <h3>Search Results</h3>
-            <ul>
-              {recipes.map((recipe) => (
-                <li key={recipe.id}>
-                  <Link to={`/recipe/${recipe.id}`}>
-                    <h4>{recipe.name}</h4>
-                  </Link>
-                  {/* Display tags for the recipe */}
-                  <p>Tags: {recipe.tags.join(', ')}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
+              <img src={recipe.image_url} alt={recipe.name} />
+            </div>
+          ))
         ) : (
-          <p>No recipes found for "{searchTerm}".</p>
+          <p>No recipes found</p>
         )}
       </div>
     </div>
   );
 }
 
-export default SearchRecipes;
+export default RecipeList;

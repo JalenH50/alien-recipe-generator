@@ -34,9 +34,9 @@ function GenerateRecipe() {
     for (let i = 0; i < numSteps; i++) {
       generatedSteps.push({
         step_number: i + 1,
-        method_id: '',  // Initially empty
-        ingredient_id: '',  // Initially empty
-        additional_instructions: '',  // Initially empty
+        method_name: '',  // Initially empty
+        ingredient_name: '',  // Initially empty
+        additional_information: '',  // Initially empty
       });
     }
 
@@ -44,52 +44,55 @@ function GenerateRecipe() {
     setLoading(false);
   };
 
-  // Handle the saving of the recipe and steps
+  // Handle changes in step inputs (method, ingredient, additional information)
+  const handleStepChange = (stepIndex, field, value) => {
+    const updatedSteps = [...steps];
+    updatedSteps[stepIndex][field] = value;
+    setSteps(updatedSteps);
+  };
+
+  // Handle the saving of the recipe
   const handleSaveRecipe = async () => {
-    if (!recipeName || !imageUrl || steps.some(step => !step.method_id || !step.ingredient_id)) {
+    if (!recipeName || !imageUrl || steps.some(step => !step.method_name || !step.ingredient_name)) {
       alert('Please provide a recipe name, image, and ensure all steps are filled out.');
       return;
     }
 
     // Step 1: Collect combined step strings (method + ingredient + additional instructions)
     const combinedSteps = steps.map((step) => {
-      const ingredient = ingredients.find(i => i.id === step.ingredient_id);
-      const method = methods.find(m => m.id === step.method_id);
-
-      // Combine method, ingredient name, and instructions into one string
-      const stepString = `${method ? method.method_name : 'No method selected'} ${ingredient ? ingredient.name : 'No ingredient selected'} ${step.additional_instructions || ''}`.trim();
-
-      return stepString;
+      const ingredient = ingredients.find(i => i.name === step.ingredient_name);
+      const method = methods.find(m => m.method_name === step.method_name);
+      
+      // Format the step string as "method_name + ingredient + additional information"
+      return `${method ? method.method_name : 'No method selected'} ${ingredient ? ingredient.name : 'No ingredient selected'} ${step.additional_information || ''}`.trim();
     });
 
-    // Step 2: Collect ingredient JSONB data
-    const ingredientJsonbs = [];
-    
+    // Step 2: Collect tags from the selected ingredients
+    const ingredientTags = [];
     for (let step of steps) {
-      const ingredient = ingredients.find(i => i.id === step.ingredient_id);
-      if (ingredient) {
-        // Add ingredient's JSONB data to the array
-        ingredientJsonbs.push(ingredient.jsonb_column); // Assuming jsonb_column is the field holding JSONB data
+      const ingredient = ingredients.find(i => i.name === step.ingredient_name);
+      if (ingredient && ingredient.tags) {
+        ingredientTags.push(...ingredient.tags); // Add tags to the array
       }
     }
 
-    // Step 3: Merge the JSONB data into a single array (remove duplicates)
-    const uniqueTags = Array.from(new Set(ingredientJsonbs.map(tag => JSON.stringify(tag)))).map(tag => JSON.parse(tag));
+    // Remove duplicates from the tags
+    const uniqueTags = Array.from(new Set(ingredientTags.map(tag => JSON.stringify(tag)))).map(tag => JSON.parse(tag));
 
-    // Step 4: Insert the new recipe into the recipes table
+    // Step 3: Insert the new recipe into the recipes table
     const { data: recipeData, error: recipeError } = await supabase.from('recipes').insert([{
       name: recipeName,
       image_url: imageUrl,
-      tags: uniqueTags, // Add the combined JSONB data here
+      tags: uniqueTags.length > 0 ? uniqueTags : null, // Ensure tags are not empty
       steps: combinedSteps // Add combined steps as an array of strings
-    }]);
+    }]).select(); // Ensure to select the inserted data
 
     if (recipeError) {
       console.error('Error saving recipe:', recipeError);
       return;
     }
 
-    // Step 5: Ensure recipeData is populated before accessing it
+    // Step 4: Ensure recipeData is populated before accessing it
     if (!recipeData || recipeData.length === 0) {
       console.error('No recipe data returned after insert');
       return;
@@ -97,15 +100,22 @@ function GenerateRecipe() {
 
     const recipeId = recipeData[0].id; // Now we are sure recipeData is valid
 
-    // Step 6: Insert the steps for the generated recipe
-    const stepInserts = steps.map((step) => ({
-      recipe_id: recipeId,
-      step_number: step.step_number,
-      method_id: step.method_id,
-      ingredient_id: step.ingredient_id,
-      instruction: step.additional_instructions,
-    }));
+    // Step 5: Insert the steps for the generated recipe
+    const stepInserts = steps.map((step) => {
+      const ingredient = ingredients.find(i => i.name === step.ingredient_name);
+      const method = methods.find(m => m.method_name === step.method_name);
 
+      return {
+        recipe_id: recipeId,
+        step_number: step.step_number,
+        method_name: step.method_name,
+        ingredient_name: step.ingredient_name, // Store ingredient name
+        tags: ingredient ? ingredient.tags : [], // Store tags for each ingredient
+        instruction: `${method ? method.method_name : 'No method selected'} ${ingredient ? ingredient.name : 'No ingredient selected'} ${step.additional_information || ''}` // Combined instruction
+      };
+    });
+
+    // Insert the steps into the cooking_steps table
     const { error: stepError } = await supabase.from('cooking_steps').insert(stepInserts);
 
     if (stepError) {
@@ -113,13 +123,6 @@ function GenerateRecipe() {
     } else {
       console.log('Recipe and steps saved successfully!');
     }
-  };
-
-  // Handle changes in step inputs (method, ingredient, additional instructions)
-  const handleStepChange = (stepIndex, field, value) => {
-    const updatedSteps = [...steps];
-    updatedSteps[stepIndex][field] = value;
-    setSteps(updatedSteps);
   };
 
   return (
@@ -158,12 +161,12 @@ function GenerateRecipe() {
                 <div>
                   <label>Method</label>
                   <select
-                    value={step.method_id}
-                    onChange={(e) => handleStepChange(index, 'method_id', e.target.value)}
+                    value={step.method_name}
+                    onChange={(e) => handleStepChange(index, 'method_name', e.target.value)}
                   >
                     <option value="">Select Method</option>
                     {methods.map((method) => (
-                      <option key={method.id} value={method.id}>
+                      <option key={method.id} value={method.method_name}>
                         {method.method_name}
                       </option>
                     ))}
@@ -174,25 +177,25 @@ function GenerateRecipe() {
                 <div>
                   <label>Ingredient</label>
                   <select
-                    value={step.ingredient_id}
-                    onChange={(e) => handleStepChange(index, 'ingredient_id', e.target.value)}
+                    value={step.ingredient_name}
+                    onChange={(e) => handleStepChange(index, 'ingredient_name', e.target.value)}
                   >
                     <option value="">Select Ingredient</option>
                     {ingredients.map((ingredient) => (
-                      <option key={ingredient.id} value={ingredient.id}>
+                      <option key={ingredient.id} value={ingredient.name}>
                         {ingredient.name}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                {/* Additional Instructions */}
+                {/* Additional Information */}
                 <div>
-                  <label>Additional Instructions</label>
+                  <label>Additional Information</label>
                   <input
                     type="text"
-                    value={step.additional_instructions}
-                    onChange={(e) => handleStepChange(index, 'additional_instructions', e.target.value)}
+                    value={step.additional_information}
+                    onChange={(e) => handleStepChange(index, 'additional_information', e.target.value)}
                     placeholder="Enter any additional instructions"
                   />
                 </div>
